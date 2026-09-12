@@ -1,0 +1,150 @@
+<!-- QR Code 頁面 -->
+<div id="qr-page" class="page qr-page">
+    <div class="qr-container">
+        <h1>樂齡點餐系統</h1>
+        <div id="qr-code"></div>
+        <p class="qr-instruction">👆 掃描 QR Code 開始點餐</p>
+    </div>
+</div>
+
+<!-- 菜單頁面 -->
+<div id="menu-page" class="page menu-page">
+    <div class="menu-header">
+        <h1>🍱 菜單</h1>
+        <p>選擇您喜愛的餐點</p>
+    </div>
+    
+    <div id="menu-items" class="menu-grid"></div>
+    
+    <!-- 購物車浮動欄 -->
+    <div class="cart-section">
+        <div class="cart-info">
+            <span class="cart-count" id="cart-count">0 項商品</span>
+            <span class="cart-total" id="cart-total">$0</span>
+        </div>
+        <div class="cart-buttons">
+            <button class="btn btn-secondary cart-btn">🛒 查看購物車 (0)</button>
+            <button class="btn btn-primary" style="flex: 1;">✓ 確認</button>
+        </div>
+    </div>
+</div>
+
+<!-- 購物車頁面 -->
+<div id="cart-page" class="page cart-page">
+    <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">🛒 購物車</h1>
+    
+    <div id="cart-items-container" class="cart-items">
+        <div class="empty-cart">購物車是空的</div>
+    </div>
+    
+    <div class="order-summary">
+        <div class="summary-row">
+            <span>商品小計</span>
+            <span id="subtotal">$0</span>
+        </div>
+        <div class="summary-row total">
+            <span>合計</span>
+            <span id="total-price">$0</span>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        <button class="btn btn-secondary" id="continue-shopping-btn" style="flex: 1;">← 繼續點餐</button>
+        <button class="btn btn-primary" id="checkout-btn" style="flex: 1;">進行結帳 →</button>
+    </div>
+</div>
+
+<!-- 結帳頁面 -->
+<div id="checkout-page" class="page cart-page">
+    <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">💳 結帳</h1>
+    
+    <!-- 用餐方式選擇 -->
+    <div class="options-section">
+        <div class="options-title">🍽️ 用餐方式</div>
+        <div class="option-cards">
+            <div class="option-card" data-type="eatIn" data-value="dine-in">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🪑</div>
+                <div>內用</div>
+            </div>
+            <div class="option-card" data-type="eatIn" data-value="takeout">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛍️</div>
+                <div>外帶</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 支付方式選擇 -->
+    <div class="options-section">
+        <div class="options-title">💳 支付方式</div>
+        <div class="payment-methods">
+            <div class="option-card" data-type="payment" data-value="cash">
+                <div class="payment-icon">💰</div>
+                <div class="payment-method-name">現金支付</div>
+            </div>
+            <div class="option-card" data-type="payment" data-value="line-pay">
+                <div class="payment-icon">💚</div>
+                <div class="payment-method-name">LINE PAY</div>
+            </div>
+            <div class="option-card" data-type="payment" data-value="apple-pay">
+                <div class="payment-icon">🍎</div>
+                <div class="payment-method-name">Apple Pay</div>
+            </div>
+            <div class="option-card" data-type="payment" data-value="visa">
+                <div class="payment-icon">💳</div>
+                <div class="payment-method-name">VISA</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 訂單摘要 -->
+    <div class="order-summary">
+        <div class="summary-row">
+            <span>商品小計</span>
+            <span id="checkout-subtotal">$0</span>
+        </div>
+        <div class="summary-row total">
+            <span>合計</span>
+            <span id="checkout-total">$0</span>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem;">
+        <button class="btn btn-secondary" id="back-to-menu-btn" style="flex: 1;">← 返回</button>
+        <button class="btn btn-primary" id="confirm-order-btn" style="flex: 1;">確認訂單 →</button>
+    </div>
+</div>
+
+<!-- 訂單確認頁面 -->
+<div id="confirmation-page" class="page confirmation-page">
+    <h1 class="confirmation-title">✓ 確認訂單</h1>
+    
+    <div id="confirmation-content">
+        <!-- 動態生成 -->
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        <button class="btn btn-secondary" id="back-to-menu-btn" style="flex: 1;">← 返回修改</button>
+        <button class="btn btn-primary" id="place-order-btn" style="flex: 1;">📍 確認下單</button>
+    </div>
+</div>
+
+<!-- 成功頁面 -->
+<div id="success-page" class="page success-page">
+    <div class="success-icon">✅</div>
+    <h1>訂單已確認！</h1>
+    <p>您的美食即將準備完成</p>
+    
+    <div class="order-number" id="order-num">ORD00000000</div>
+    
+    <p style="font-size: 1.3rem; margin-bottom: 0.5rem;">⏱️ 預計等待時間</p>
+    <div id="waiting-time" class="waiting-time">
+        <span class="waiting-time-number">10</span>:
+        <span class="waiting-time-number">00</span>
+    </div>
+    
+    <p style="font-size: 1.2rem; margin-top: 2rem; opacity: 0.9;">請保管好您的取餐號碼</p>
+    
+    <div class="success-buttons">
+        <button class="btn btn-primary" id="new-order-btn">🔄 再點一次</button>
+    </div>
+</div>
