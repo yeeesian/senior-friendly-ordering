@@ -162,19 +162,38 @@ const APP = {
     orderNumber: null,
     
     init() {
+        this.generateQRCode();
         this.setupEventListeners();
-        this.showPage('qr');
+    },
+    
+    generateQRCode() {
+        // 使用 QRious 庫生成 QR Code
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.split('?')[0];
+        const orderingPageUrl = baseUrl.includes('index.html') 
+            ? baseUrl.replace('index.html', '') 
+            : baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+        
+        if (typeof QRious !== 'undefined') {
+            new QRious({
+                element: document.getElementById('qr-code'),
+                size: 300,
+                value: orderingPageUrl,
+                level: 'H'
+            });
+        }
     },
     
     setupEventListeners() {
-        // 菜單頁面
         document.addEventListener('click', (e) => {
+            // 菜單頁面 - 加入購物車
             if (e.target.closest('.menu-item-btn')) {
                 const btn = e.target.closest('.menu-item-btn');
                 const itemId = parseInt(btn.dataset.id);
                 this.addToCart(itemId);
             }
             
+            // 數量調整
             if (e.target.closest('.quantity-btn')) {
                 const btn = e.target.closest('.quantity-btn');
                 const action = btn.dataset.action;
@@ -183,40 +202,75 @@ const APP = {
                 if (action === 'plus') this.updateQuantity(itemId, 1);
             }
             
+            // 查看購物車
             if (e.target.closest('.cart-btn')) {
                 this.showPage('cart');
             }
             
+            // 從菜單結帳
             if (e.target.id === 'checkout-btn') {
-                this.showPage('checkout');
+                if (this.cart.length > 0) {
+                    this.showPage('checkout');
+                } else {
+                    alert('請先選擇商品');
+                }
             }
             
+            // 繼續點餐
             if (e.target.id === 'continue-shopping-btn') {
                 this.showPage('menu');
             }
             
+            // 從購物車進行結帳
+            if (e.target.id === 'proceed-checkout-btn') {
+                if (this.cart.length > 0) {
+                    this.showPage('checkout');
+                } else {
+                    alert('購物車是空的');
+                }
+            }
+            
+            // 返回購物車
+            if (e.target.id === 'back-to-cart-btn') {
+                this.showPage('cart');
+            }
+            
+            // 確認訂單
             if (e.target.id === 'confirm-order-btn') {
+                if (!this.eatInOption) {
+                    alert('請選擇用餐方式');
+                    return;
+                }
+                if (!this.paymentMethod) {
+                    alert('請選擇支付方式');
+                    return;
+                }
                 this.showPage('confirmation');
             }
             
+            // 返回結帳
+            if (e.target.id === 'back-checkout-btn') {
+                this.showPage('checkout');
+            }
+            
+            // 下單
             if (e.target.id === 'place-order-btn') {
                 this.placeOrder();
             }
             
-            if (e.target.id === 'back-to-menu-btn') {
-                this.showPage('menu');
-            }
-            
+            // 用餐方式選擇
             if (e.target.closest('.option-card[data-type="eatIn"]')) {
                 this.eatInOption = e.target.closest('.option-card').dataset.value;
                 this.updateOptionCards('eatIn', this.eatInOption);
             }
             
+            // 支付方式選擇
             if (e.target.closest('.option-card[data-type="payment"]')) {
                 this.paymentMethod = e.target.closest('.option-card').dataset.value;
                 this.updateOptionCards('payment', this.paymentMethod);
             }
             
+            // 新訂單
             if (e.target.id === 'new-order-btn') {
                 this.resetOrder();
                 this.showPage('menu');
@@ -257,6 +311,7 @@ const APP = {
     updateCart() {
         this.renderCart();
         this.updateCartButton();
+        this.updateCheckoutSummary();
     },
     
     renderCart() {
@@ -302,6 +357,20 @@ const APP = {
         if (cartTotal) {
             cartTotal.textContent = `$${totalPrice}`;
         }
+    },
+    
+    updateCheckoutSummary() {
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        const subtotal = document.getElementById('subtotal');
+        const totalPrice = document.getElementById('total-price');
+        const checkoutSubtotal = document.getElementById('checkout-subtotal');
+        const checkoutTotal = document.getElementById('checkout-total');
+        
+        if (subtotal) subtotal.textContent = `$${total}`;
+        if (totalPrice) totalPrice.textContent = `$${total}`;
+        if (checkoutSubtotal) checkoutSubtotal.textContent = `$${total}`;
+        if (checkoutTotal) checkoutTotal.textContent = `$${total}`;
     },
     
     updateOptionCards(type, value) {
@@ -370,7 +439,6 @@ const APP = {
     
     renderConfirmation() {
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const itemCount = this.cart.reduce((sum, item) => sum + item.quantity, 0);
         
         const items = this.cart.map(item => `
             <div class="confirmation-detail">
@@ -391,7 +459,7 @@ const APP = {
                     <h3>⚙️ 用餐選項</h3>
                     <div class="confirmation-detail">
                         <span class="confirmation-detail-label">用餐方式</span>
-                        <span>${this.eatInOption === 'dine-in' ? '內用' : '外帶'}</span>
+                        <span>${this.eatInOption === 'dine-in' ? '內用 🪑' : '外帶 🛍️'}</span>
                     </div>
                 </div>
                 
@@ -424,22 +492,25 @@ const APP = {
     
     getPaymentMethodName(method) {
         const methods = {
-            'cash': '現金支付',
-            'line-pay': 'LINE PAY',
-            'apple-pay': 'Apple Pay',
-            'visa': 'VISA'
+            'cash': '💰 現金支付',
+            'line-pay': '💚 LINE PAY',
+            'apple-pay': '🍎 Apple Pay',
+            'visa': '💳 VISA'
         };
         return methods[method] || '未選擇';
     },
     
     placeOrder() {
         this.orderNumber = this.generateOrderNumber();
+        document.getElementById('order-num').textContent = this.orderNumber;
         this.showPage('success');
         this.startWaitingTimer();
     },
     
     generateOrderNumber() {
-        return 'ORD' + Date.now().toString().slice(-8).toUpperCase();
+        const timestamp = Date.now().toString().slice(-8);
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return `ORD${timestamp}${random}`;
     },
     
     startWaitingTimer() {
@@ -456,7 +527,7 @@ const APP = {
             
             if (minutes < 0) {
                 clearInterval(interval);
-                waitingTime.innerHTML = '✅ 餐點已準備完成，請前往取餐！';
+                waitingTime.innerHTML = '<span style="font-size: 2rem;">✅ 餐點已準備完成，請前往取餐！</span>';
                 return;
             }
             
@@ -472,7 +543,9 @@ const APP = {
         this.eatInOption = null;
         this.paymentMethod = null;
         this.orderNumber = null;
-        this.updateCart();
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.remove('selected');
+        });
     }
 };
 
